@@ -4,7 +4,7 @@ package com.example.AppointmentCalendar.Models;
 import android.os.Environment;
 import android.util.Log;
 
-import com.example.AppointmentCalendar.MainActivity;
+import com.example.AppointmentCalendar.View.Activity.MainActivity;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;

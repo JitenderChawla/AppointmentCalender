@@ -1,4 +1,4 @@
-package com.example.AppointmentCalendar;
+package com.example.AppointmentCalendar.View.Fragment;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,6 +11,9 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.AppointmentCalendar.Models.DayModel;
+import com.example.AppointmentCalendar.Models.MessageEvent;
+import com.example.AppointmentCalendar.R;
+import com.example.AppointmentCalendar.View.Activity.MainActivity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.joda.time.LocalDate;
@@ -88,7 +91,7 @@ public class FirstFragment extends Fragment {
             if (position>=firstday){
                 position=position-firstday;
                 DayModel dayModel=dayModels.get(position);
-                boolean selected=dayModel.getDay()==MainActivity.lastdate.getDayOfMonth()&&dayModel.getMonth()==MainActivity.lastdate.getMonthOfYear()&&dayModel.getYear()==MainActivity.lastdate.getYear()?true:false;
+                boolean selected=dayModel.getDay()== MainActivity.lastdate.getDayOfMonth()&&dayModel.getMonth()==MainActivity.lastdate.getMonthOfYear()&&dayModel.getYear()==MainActivity.lastdate.getYear()?true:false;
 
                 if (dayModel.isToday()){
                     holder.textView.setBackgroundResource(R.drawable.circle);

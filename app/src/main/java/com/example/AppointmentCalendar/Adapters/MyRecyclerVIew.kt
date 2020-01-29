@@ -1,4 +1,4 @@
-package com.example.AppointmentCalendar
+package com.example.AppointmentCalendar.Adapters
 
 import android.content.Context
 import android.support.v4.view.ViewCompat
@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.example.AppointmentCalendar.View.Activity.MainActivity
 
 /**A RecyclerView that allows temporary pausing of casuing its scroll to affect appBarLayout, based on https://stackoverflow.com/a/45338791/878126 */
 class MyRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) : RecyclerView(context, attrs, defStyle) {
@@ -83,7 +84,7 @@ class MyRecyclerView @JvmOverloads constructor(context: Context, attrs: Attribut
 
                 mView = mLayoutManager!!.findViewByPosition(mAppBarTracking!!.appbaroffset())
                 if (mView!=null){
-                    consumed!![1] = dy - mView!!.top+MainActivity.topspace
+                    consumed!![1] = dy - mView!!.top+ MainActivity.topspace
                 }
 
               return true

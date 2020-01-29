@@ -50,9 +50,4 @@ public class Bookings
         this.customer = customer;
     }
 
-//    @Override
-//    public String toString()
-//    {
-//        return "ClassPojo [slotId = "+slotId+", bookingStartTime = "+bookingStartTime+", bookingId = "+bookingId+", customer = "+customer+"]";
-//    }
 }

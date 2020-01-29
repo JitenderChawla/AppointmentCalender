@@ -4,7 +4,7 @@ public class Customer
 {
     private String customerId;
 
-    private String customerName;
+    public String customerName;
 
     public String getCustomerId ()
     {
@@ -26,11 +26,6 @@ public class Customer
         this.customerName = customerName;
     }
 
-//    @Override
-//    public String toString()
-//    {
-//        return "ClassPojo [customerId = "+customerId+", customerName = "+customerName+"]";
-//    }
 }
 			
 		

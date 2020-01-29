@@ -1,4 +1,4 @@
-package com.example.AppointmentCalendar;
+package com.example.AppointmentCalendar.Models;
 
 import org.joda.time.LocalDate;
 

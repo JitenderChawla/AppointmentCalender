@@ -7,13 +7,27 @@ import org.joda.time.LocalDate;
 public class EventModel implements Comparable<EventModel> {
     private String eventname;
     private LocalDate localDate;
+    private long time;
 
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public EventModel(String eventname, LocalDate localDate, int type,long time) {
+        this.eventname = eventname;
+        this.localDate = localDate;
+        this.time = time;
+        this.type = type;
+    }
     public EventModel(String eventname, LocalDate localDate, int type) {
         this.eventname = eventname;
         this.localDate = localDate;
         this.type = type;
     }
-
     private int type;
 
     public int getType() {

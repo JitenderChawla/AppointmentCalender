@@ -7,7 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.SparseArray;
 import android.view.View;
 
-import com.example.AppointmentCalendar.MainActivity;
+import com.example.AppointmentCalendar.View.Activity.MainActivity;
 import com.timehop.stickyheadersrecyclerview.caching.HeaderProvider;
 import com.timehop.stickyheadersrecyclerview.caching.HeaderViewCache;
 import com.timehop.stickyheadersrecyclerview.calculation.DimensionCalculator;

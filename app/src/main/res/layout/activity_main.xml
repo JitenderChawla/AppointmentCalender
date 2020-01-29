@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:background="@android:color/white"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".View.Activity.MainActivity">
 
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
@@ -28,7 +28,7 @@
             app:statusBarScrim="?attr/colorPrimaryDark">
 
             <!--large view -->
-            <com.example.AppointmentCalendar.CustomCalenderView
+            <com.example.AppointmentCalendar.View.CustomView.CustomCalenderView
                 android:id="@+id/calander"
                 android:layout_width="match_parent"
                 android:layout_height="500dp"
@@ -38,7 +38,7 @@
                 android:layout_marginTop="?attr/actionBarSize"
               >
 
-            </com.example.AppointmentCalendar.CustomCalenderView>
+            </com.example.AppointmentCalendar.View.CustomView.CustomCalenderView>
 
             <!--top toolbar-->
             <android.support.v7.widget.Toolbar
@@ -103,7 +103,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <com.example.AppointmentCalendar.MyRecyclerView
+    <com.example.AppointmentCalendar.Adapters.MyRecyclerView
         android:id="@+id/nestedView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

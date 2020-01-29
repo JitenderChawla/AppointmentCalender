@@ -1,15 +1,9 @@
 package com.example.AppointmentCalendar.Models;
 
-import org.joda.time.LocalDate;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class Booking
 {
-
-
-//    public HashMap<LocalDate, ArrayList<Bookings>> localDateHashMap = new HashMap<>();
     private long date;
 
     ArrayList < Bookings>   bookings;
@@ -34,10 +28,5 @@ public class Booking
         this.bookings = bookings;
     }
 
-//    @Override
-//    public String toString()
-//    {
-//        return "ClassPojo [date = "+date+", bookings = "+bookings+"]";
-//    }
 }
 		

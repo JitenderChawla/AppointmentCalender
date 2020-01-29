@@ -1,4 +1,4 @@
-package com.example.AppointmentCalendar;
+package com.example.AppointmentCalendar.View.Activity;
 
 import android.Manifest;
 import android.animation.Animator;
@@ -27,6 +27,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -42,12 +43,15 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.AppointmentCalendar.Models.AddEvent;
+import com.example.AppointmentCalendar.View.CustomView.CustomCalenderView;
+import com.example.AppointmentCalendar.Models.CustomerTimeSorter;
 import com.example.AppointmentCalendar.Interface.MonthChangeListner;
+import com.example.AppointmentCalendar.Models.MessageEvent;
 import com.example.AppointmentCalendar.Models.Booking;
 import com.example.AppointmentCalendar.Models.Bookings;
 import com.example.AppointmentCalendar.Models.Common;
@@ -55,6 +59,9 @@ import com.example.AppointmentCalendar.Models.Customer;
 import com.example.AppointmentCalendar.Models.EventModel;
 import com.example.AppointmentCalendar.Models.MonthModel;
 import com.example.AppointmentCalendar.Models.ObjectManager;
+import com.example.AppointmentCalendar.Models.MonthChange;
+import com.example.AppointmentCalendar.Adapters.MyRecyclerView;
+import com.example.AppointmentCalendar.R;
 import com.gjiazhe.scrollparallaximageview.ScrollParallaxImageView;
 import com.gjiazhe.scrollparallaximageview.parallaxstyle.VerticalMovingStyle;
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter;
@@ -62,41 +69,29 @@ import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersDecoration;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
+import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.joda.time.Days;
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-
-import static java.time.temporal.ChronoUnit.DAYS;
-
-//import static com.example.GoogleCalendar.Utility.getDate;
 
 public class MainActivity extends AppCompatActivity
         implements MyRecyclerView.AppBarTracking, View.OnClickListener {
@@ -136,14 +131,10 @@ public class MainActivity extends AppCompatActivity
     private View popupInputDialogView = null;
     // Contains user name data.
     private EditText customerNameEditText = null;
-    // Contains password data.
-    private EditText passwordEditText = null;
-    // Contains email data.
-    private EditText emailEditText = null;
+
     // Click this button in popup dialog to save user input data in above three edittext.
     private Button saveUserDataButton = null;
     // Click this button to cancel edit user data.
-    private Button cancelUserDataButton = null;
     private int[] monthresource = {
             R.drawable.bkg_01_jan,
             R.drawable.bkg_02_feb,
@@ -159,6 +150,9 @@ public class MainActivity extends AppCompatActivity
             R.drawable.bkg_12_dec
     };
     AlertDialog alertDialog;
+
+    DateTime mEventStartDateTime;
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_favorite) {
@@ -337,23 +331,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-    public String loadJSONFromAsset() {
-        String json = null;
-        try {
-            InputStream is = getAssets().open("Booking.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            json = new String(buffer, "UTF-8");
-        } catch (IOException ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        return json;
-    }
-
     private void copyAssets(File file) {
         AssetManager assetManager = getAssets();
         String[] files = null;
@@ -427,8 +404,7 @@ public class MainActivity extends AppCompatActivity
                 // Create a AlertDialog Builder.
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(MainActivity.this);
                 // Set title, icon, can not cancel properties.
-                alertDialogBuilder.setTitle("New Appointment.");
-                alertDialogBuilder.setIcon(R.drawable.ic_launcher_background);
+                alertDialogBuilder.setTitle("New Appointment");
                 alertDialogBuilder.setCancelable(true);
 
                 // Init popup dialog view and it's ui controls.
@@ -438,7 +414,7 @@ public class MainActivity extends AppCompatActivity
                 alertDialogBuilder.setView(popupInputDialogView);
 
                 // Create AlertDialog and show.
-                  alertDialog = alertDialogBuilder.create();
+                alertDialog = alertDialogBuilder.create();
                 alertDialog.show();
 
             }
@@ -609,9 +585,10 @@ public class MainActivity extends AppCompatActivity
         LocalDate mintime = new LocalDate().minusMonths(10);
         LocalDate maxtime = new LocalDate().plusMonths(10);
         HashMap<LocalDate, String[]> eventlist = bingJsontoHashmap();
+//        HashMap<LocalDate, String[]> eventlist = bingJsontoArraylist();
 //            HashMap<LocalDate, ArrayList<Bookings>> eventlist1 = bingJsontoHashmapArraylist();
         HashMap<LocalDate, ArrayList<Bookings>> eventlist1 = new HashMap<>();  // Currently it is not in use jitender
-        calendarView.init(eventlist, mintime, maxtime, eventlist1);
+        calendarView.init(eventlist, mintime, maxtime, _appointmentbooking);
 
         calendarView.setCurrentmonth(new LocalDate());
         calendarView.adjustheight();
@@ -632,7 +609,6 @@ public class MainActivity extends AppCompatActivity
                 _file.createNewFile();
 
                 copyAssets(_file);
-//                loadJSONFromAsset();
             }
 
         } catch (Exception e) {
@@ -640,30 +616,10 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void setupStartTime() {
-//        hideKeyboard();
-//        TimePickerDialog(this, mDialogTheme, startTimeSetListener, mEventStartDateTime.hourOfDay, mEventStartDateTime.minuteOfHour, config.use24HourFormat).show()
-        // Get Current Time
-        final Calendar c = Calendar.getInstance();
-        mHour = c.get(Calendar.HOUR_OF_DAY);
-        mMinute = c.get(Calendar.MINUTE);
-
-        // Launch Time Picker Dialog
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this,
-                new TimePickerDialog.OnTimeSetListener() {
-
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay,
-                                          int minute) {
-
-//                        txtTime.setText(hourOfDay + ":" + minute);
-                    }
-                }, mHour, mMinute, false);
-        timePickerDialog.show();
-    }
-
     /* Initialize popup dialog view and ui controls in the popup dialog. */
     private void initPopupViewControls() {
+
+        mEventStartDateTime = new DateTime(System.currentTimeMillis());
         // Get layout inflater object.
         LayoutInflater layoutInflater = LayoutInflater.from(MainActivity.this);
 
@@ -679,22 +635,13 @@ public class MainActivity extends AppCompatActivity
         button_save_user_data = popupInputDialogView.findViewById(R.id.button_save_user_data);
         button_save_user_data.setOnClickListener(this);
 
-//        String dayCode = Formatter.getTodayCode();
 
         Calendar calendar = Calendar.getInstance();
         event_start_date.setText(new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault()).format(new Date()));
         int min = calendar.get(Calendar.MINUTE);
         int hour = calendar.get(Calendar.HOUR);
-        event_start_time.setText(String.valueOf(hour) + ":" + String.valueOf(min));
+        event_start_time.setText(String.format("%02d",hour) + ":" + String.format("%02d",min));
     }
-//        calendar.set(year,monthOfYear,dayOfMonth);
-//        mCurrentDate = calendar.getTimeInMillis();
-//        event_start_date.setCu
-//        saveUserDataButton = popupInputDialogView.findViewById(R.id.button_save_user_data);
-//        cancelUserDataButton = popupInputDialogView.findViewById(R.id.button_cancel_user_data);
-
-    // Display values from the main activity list view in user input edittext.
-//        initEditTextUserDataInPopupDialog();
 
 
     private HashMap<LocalDate, String[]> bingJsontoHashmap() {
@@ -703,8 +650,7 @@ public class MainActivity extends AppCompatActivity
 
 //           ObjectManager.deSerializeObject();
             String jbookingString = ObjectManager.readBookingsJsonFile();
-             _appointmentbooking = new ArrayList<>();
-
+            _appointmentbooking = new ArrayList<>();
 
             JSONArray jsonArray = new JSONArray(jbookingString);
             ArrayList<Bookings> _bookingarr = null;
@@ -775,67 +721,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-//    private HashMap<LocalDate, ArrayList<Bookings>> bingJsontoHashmapArraylist() {
-//        try {
-////            ObjectManager.deSerializeObject();
-//            String jbookingString = ObjectManager.readBookingsJsonFile();
-//
-//            JSONArray jsonArray = new JSONArray(jbookingString);
-//            ArrayList<Bookings> _bookingarr = null;
-//            MainActivity.localDateHashMap  = new HashMap<>();
-//            HashMap<LocalDate, String[]> localDateHashMapstr = new HashMap<>();
-//            for (int bookingsContainer = 0; bookingsContainer < jsonArray.length(); bookingsContainer++) {
-//                LocalDate localDate = getDate((Long) jsonArray.getJSONObject(bookingsContainer).get("date"));
-//                _bookingarr = new ArrayList<Bookings>();
-//                JSONArray _jsonBookingsArray = jsonArray.getJSONObject(bookingsContainer).getJSONArray("bookings");
-//                for (int _bookings = 0; _bookings < _jsonBookingsArray.length(); _bookings++) {
-//                    Bookings _booking = new Bookings();
-//                    _booking.setBookingId((Integer) _jsonBookingsArray.getJSONObject(_bookings).get("bookingId"));
-//                    _booking.setSlotId((Integer) _jsonBookingsArray.getJSONObject(_bookings).get("slotId"));
-//                    _booking.setBookingStartTime((Long) _jsonBookingsArray.getJSONObject(_bookings).get("bookingStartTime"));
-//                    JSONObject _jsonCustomerObject = (JSONObject) _jsonBookingsArray.getJSONObject(_bookings).get("customer");
-//                    Customer _customer = new Customer();
-//                    _customer.setCustomerId((String) _jsonCustomerObject.get("customerId"));
-//                    _customer.setCustomerName((String) _jsonCustomerObject.get("customerName"));
-//                    _booking.setCustomer(_customer);
-//
-//                    _bookingarr.add(_booking);
-//
-//                    if (!localDateHashMapstr.containsKey(localDate)) {
-//                        localDateHashMapstr.put(localDate, new String[]{(String) _jsonCustomerObject.get("customerName")});
-//                    } else {
-//                        String[] s = localDateHashMapstr.get(localDate);
-//                        boolean isneed = true;
-//                        for (int i = 0; i < s.length; i++) {
-//                            if (s[i].equals((String) _jsonCustomerObject.get("customerName"))) {
-//
-//                                isneed = false;
-//                                break;
-//                            }
-//                        }
-//                        if (isneed) {
-//                            String ss[] = Arrays.copyOf(s, s.length + 1);
-//                            ss[ss.length - 1] = (String) _jsonCustomerObject.get("customerName");
-//                            localDateHashMapstr.put(localDate, ss);
-//                        }
-//
-//                    }
-//
-//                }
-//                if (!MainActivity.localDateHashMap .containsKey(localDate)) {
-//                    MainActivity.localDateHashMap .put(localDate, _bookingarr);
-//                }
-//
-//            }
-//
-//            return MainActivity.localDateHashMap ;
-//
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -854,7 +739,7 @@ public class MainActivity extends AppCompatActivity
             checkBookingDataExistsinLocal();
 
             HashMap<LocalDate, String[]> eventlist = bingJsontoHashmap();
-            calendarView.init(eventlist, mintime, maxtime);
+            calendarView.init(eventlist, mintime, maxtime, _appointmentbooking);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -866,33 +751,6 @@ public class MainActivity extends AppCompatActivity
             }, 10);
 
         }
-    }
-
-    private void bindJsonbooking() {
-
-//        LocalDate localDate=getDate(Long.parseLong(cursor.getString(3)));
-//        if (!localDateHashMap.containsKey(localDate)){
-//            Log.e("location",cursor.getString(5)+"f");
-//            localDateHashMap.put(localDate,new String[]{cursor.getString(1)});
-//        }
-//        else {
-//            String[] s=localDateHashMap.get(localDate);
-//            boolean isneed=true;
-//            for (int i=0;i<s.length;i++){
-//                if (s[i].equals(cursor.getString(1))){
-//
-//                    isneed=false;
-//                    break;
-//                }
-//            }
-//            if (isneed){
-//                String ss[]= Arrays.copyOf(s,s.length+1);
-//                ss[ss.length-1]=cursor.getString(1);
-//                Log.e("location",cursor.getString(5)+"f");
-//                localDateHashMap.put(localDate,ss);
-//            }
-//
-//        }
     }
 
     @Subscribe
@@ -1139,8 +997,8 @@ public class MainActivity extends AppCompatActivity
                         @Override
                         public void onDateSet(DatePicker view, int year,
                                               int monthOfYear, int dayOfMonth) {
-
-                            event_start_date.setText(dayOfMonth + "-" + (monthOfYear + 1) + "-" + year);
+                            mEventStartDateTime = mEventStartDateTime.withDate(year, monthOfYear + 1, dayOfMonth);
+                            event_start_date.setText(String.format("%02d", dayOfMonth ) + "-" +String.format("%02d",  (monthOfYear + 1)) + "-" + year);
 
                         }
                     }, mYear, mMonth, mDay);
@@ -1160,8 +1018,8 @@ public class MainActivity extends AppCompatActivity
                         @Override
                         public void onTimeSet(TimePicker view, int hourOfDay,
                                               int minute) {
-
-                            event_start_time.setText(hourOfDay + ":" + minute);
+                            mEventStartDateTime = mEventStartDateTime.withHourOfDay(hourOfDay).withMinuteOfHour(minute);
+                            event_start_time.setText(String.format("%02d", mEventStartDateTime.getHourOfDay())+ ":" + String.format("%02d", minute));
                         }
                     }, mHour, mMinute, false);
             timePickerDialog.show();
@@ -1179,38 +1037,66 @@ public class MainActivity extends AppCompatActivity
                 long timeInMilliseconds = 0;
                 try {
                     Date date2 = formatter2.parse(sDate2);
-                    timeInMilliseconds= date2.getTime();
+                    timeInMilliseconds = date2.getTime();
                     localDate = LocalDate.fromDateFields(date2);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
 
-//                ArrayList<Booking> _bkgarr = new ArrayList<>();
+                long newStartTS = mEventStartDateTime.withSecondOfMinute(0).withMillisOfSecond(0).getMillis();
                 ArrayList<Bookings> _bookingarr = new ArrayList<Bookings>();
                 Booking _bookingdata = new Booking();
-                _bookingdata.setDate(timeInMilliseconds);
+                _bookingdata.setDate(newStartTS);
 
                 Bookings _booking = new Bookings();
                 _booking.setBookingId(1);
                 _booking.setSlotId(101);
-                _booking.setBookingStartTime(System.currentTimeMillis());
+                _booking.setBookingStartTime(newStartTS);
 
                 Customer _customer = new Customer();
                 _customer.setCustomerId(UUID.randomUUID().toString());
                 _customer.setCustomerName(customerNameEditText.getText().toString());
                 _booking.setCustomer(_customer);
-                _bookingarr.add(_booking);
-                _bookingdata.setBookings(_bookingarr);
-                if (!MainActivity.localDateHashMap.containsKey(localDate)) {
-                    MainActivity.localDateHashMap.put(localDate, _bookingarr);
+
+                boolean _bookingdatealreadyExists = false;
+                int position = -1;
+                for (Booking _mybooking : _appointmentbooking) {
+
+                    DateTime theDate = new DateTime(_mybooking.getDate());
+                    LocalDate firstDate = theDate.toLocalDate();
+                    LocalDate secondDate = mEventStartDateTime.toLocalDate();
+                    if (firstDate.compareTo(secondDate) == 0) {
+                        _bookingdatealreadyExists = true;
+                        position = _appointmentbooking.indexOf(_mybooking);
+//                        _appointmentbooking.get(position).getBookings().add(_booking);
+                    }
+                }
+
+                if (_bookingdatealreadyExists) {
+                    _appointmentbooking.get(position).getBookings().add(_booking);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                        _appointmentbooking.get(position).getBookings().sort(new CustomerTimeSorter());
+                    }
+                } else {
+                    _bookingarr.add(_booking);
+                    _bookingdata.setBookings(_bookingarr);
                     _appointmentbooking.add(_bookingdata);
                 }
-                ObjectManager.SerializeObject( _appointmentbooking);   // update the booking json
+
+                if (!MainActivity.localDateHashMap.containsKey(localDate)) {
+                    MainActivity.localDateHashMap.put(localDate, _bookingarr);
+
+                } else {
+                    MainActivity.localDateHashMap.put(localDate, _bookingarr);
+                }
+//                _appointmentbooking.sort(new CustomerTimeSorter());
+                ObjectManager.SerializeObject(_appointmentbooking);   // update the booking json
                 updateCalenderwithData();
                 alertDialog.dismiss();
             }
         }
     }
+
 
     public class DateAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements StickyRecyclerHeadersAdapter<RecyclerView.ViewHolder> {
 
@@ -1299,6 +1185,8 @@ public class MainActivity extends AppCompatActivity
 
                 ItemViewHolder holder = (ItemViewHolder) viewHolder;
                 holder.eventtextview.setText(eventalllist.get(position).getEventname());
+                Log.wtf("Jitender_position = ", "" + position);
+                holder.view_item_time.setText(convertSecondsToHMmSs(eventalllist.get(position).getTime()));
                 if (position + 1 < eventalllist.size() && eventalllist.get(position).getLocalDate().equals(today) && (!eventalllist.get(position + 1).getLocalDate().equals(today) || eventalllist.get(position + 1).getType() == 100 || eventalllist.get(position + 1).getType() == 200)) {
                     holder.circle.setVisibility(View.VISIBLE);
                     holder.line.setVisibility(View.VISIBLE);
@@ -1388,12 +1276,13 @@ public class MainActivity extends AppCompatActivity
             String daysList[] = {"", "Monday", "Tuesday", "Wednesday",
                     "Thursday", "Friday", "Saturday", "Sunday"};
 
-            TextView eventtextview;
+            TextView eventtextview, view_item_time;
             View circle, line;
 
             public ItemViewHolder(View itemView) {
                 super(itemView);
                 eventtextview = itemView.findViewById(R.id.view_item_textview);
+                view_item_time = itemView.findViewById(R.id.view_item_time);
                 eventtextview.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(final View v) {
@@ -1429,7 +1318,10 @@ public class MainActivity extends AppCompatActivity
                         redlay.setTranslationX(v.getLeft());
                         redlay.setTranslationY(view.getTop() + toolbar.getHeight());
                         redlay.setBackgroundResource(R.drawable.white_touch);
-                        redlay.setTranslationZ(0);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP
+                        ) {
+                            redlay.setTranslationZ(0);
+                        }
 
                         ValueAnimator animwidth = ValueAnimator.ofInt(redlay.getWidth(), getDevicewidth());
                         animwidth.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -1544,6 +1436,16 @@ public class MainActivity extends AppCompatActivity
                 rangetextview = itemView.findViewById(R.id.view_range_textview);
             }
         }
+    }
+
+    private String convertSecondsToHMmSs(long timeInMilliSeconds) {
+
+        Calendar cal1 = Calendar.getInstance();
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm aa");
+        cal1.setTimeInMillis(timeInMilliSeconds);
+        String time = dateFormat.format(cal1.getTime());
+        return time;
     }
 
     @Override
