@@ -11,16 +11,6 @@
         },
         "bookingStartTime":1576155600000,
         "slotId":121
-      },
-
-      {
-        "bookingId":2,
-        "customer":{
-          "customerName":"Satish Kumar",
-          "customerId":"252dsga2151a21"
-        },
-        "bookingStartTime":1577019563000,
-        "slotId":123
       }
     ]
   },
@@ -49,31 +39,7 @@
       }
     ]
   },
-  {
-    "date":1576155600000,
-    "bookings":[
-      {
-        "bookingId":1,
-        "customer":{
-          "customerName":"Manish Kumar",
-          "customerId":"252644vdgaga21"
-        },
-        "bookingStartTime":1576155600000,
-        "slotId":121
-      },
 
-      {
-        "bookingId":2,
-        "customer":{
-          "customerName":"Satish Kumar",
-          "customerId":"252dsga2151a21"
-        },
-        "bookingStartTime":1577019563000,
-        "slotId":123
-      }
-    ]
-  }
-,
   {
     "date":1579854876000,
     "bookings":[
